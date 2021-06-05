@@ -25,11 +25,13 @@ def Pass_Data():
             continue
 
 def init():
-    temper = deque()
+    global total_sum
     while len(temper)<60:
         temperature = mpu.readTemperatureMaster()
+        #print(temperature)
         temper.append(int(temperature))
         total_sum += int(temperature)
+        time.sleep(1)
 
 mpu = MPU9250(
     address_ak=AK8963_ADDRESS, 
@@ -43,6 +45,8 @@ mpu = MPU9250(
 
 mpu.configure()
 
+total_sum = 0
+temper = deque()
 init()
 while True:
     temperature = mpu.readTemperatureMaster()

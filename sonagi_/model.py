@@ -42,7 +42,7 @@ def Reset_data():
             continue
  
 driver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver')
-driver.get("file:///home/pi/Desktop/capstone/model/model.html")
+driver.get("file:///home/pi/sonagi_/model/model.html")
 
 while True:
     try:

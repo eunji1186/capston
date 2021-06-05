@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 #import FaBo9Axis_MPU9250
 from mpu9250_jmdev.registers import *
 from mpu9250_jmdev.mpu_9250 import MPU9250
@@ -7,8 +8,10 @@ import sys
 from datetime import datetime
 from collections import deque
 
+from keras import models
 from keras.models import load_model
 import numpy as np
+import pandas as pd
 
 
 def Pass_Data():
@@ -78,6 +81,7 @@ def init():
         #    pass
         
 def save_sensor_value():
+    check = 0
     avg = sum(queue)/len(queue)
     while check == 0:
         try:
@@ -102,40 +106,38 @@ mpu.configure()
 
 queue = deque()
 
-print(1)
-
-
 model = load_model('model.h5')
 start = datetime.now()
 init()
 size = len(queue)
 
-print(2)
-
 while True:
     try:
-        if (datetime.now() - start).seconds > 60:
+        if (datetime.now() - start).seconds > 10:
             save_sensor_value()
             start = datetime.now()
         
         
         curr_time = datetime.now()
         accel = mpu.readAccelerometerMaster()
-        print(accel)
+        #print(accel)
 
         gyro = mpu.readGyroscopeMaster()
-        print(gyro)
+        #print(gyro)
 
         mag = mpu.readMagnetometerMaster()
-        print(mag)
+        #print(mag)
         
-        arr = accel + gyro + mag
+        arr = [accel + gyro + mag]
+        arr = np.array(arr)
+        #df = pd.DataFrame(arr, columns = ['aX', 'aY', 'aZ', 'gX', 'gY', 'gZ', 'mX', 'mY', 'mZ'])
+        #print(df)
         
-        
-        if model.predict_classes(np.array(arr)) == 1:
-             Pass_Data()
+        if model.predict_classes(arr)[0][0] == 1:
+             print(1)
+             #Pass_Data()
              time.sleep(2)
-             Reset_Data()
+             #Reset_Data()
         
         #if abs(accel[0]) > 1 and abs(accel[1]) > 1 and abs(accel[2]) > 1:
         #    Pass_Data()
@@ -144,7 +146,7 @@ while True:
 
             
         queue.popleft()
-        queue.append(sum(accel))
+        queue.append(sum([abs(accel[0]), abs(accel[1]), abs(accel[2])]))
 
         time.sleep(0.1)
 
